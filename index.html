@@ -492,7 +492,7 @@ table.f.lk td.hit span{display:inline-block;border:2px solid var(--bad);border-r
 .focus .fh b{color:var(--ink)}
 .step[data-focus="datos"] .fz:not(.fz-d),.step[data-focus="calc"] .fz:not(.fz-c),.step[data-focus="graf"] .fz:not(.fz-g),.step[data-focus="res"] .fz:not(.fz-r){display:none!important}
 .fz-hid{display:none!important}
-.step[data-focus="datos"] table.fz-d.fz-c td:not(.in-c):not(.k):not(.t),.step[data-focus="datos"] table.fz-d.fz-c th:not(.in-c):not(:first-child):not(.k){display:none}
+.step[data-focus="datos"] table.fz-d.fz-c td:not(.in-c):not(.k):not(.t):not(:has(.in)),.step[data-focus="datos"] table.fz-d.fz-c th:not(.in-c):not(:first-child):not(.k){display:none}
 .step[data-focus="datos"] table.fz-d.fz-c td:nth-child(2){display:table-cell}
 .fz-empty{padding:28px 16px;text-align:center;color:var(--ink-2);border:1px dashed var(--line);font:400 13px var(--f-body)}
 /* ---- dosificación por equipo ---- */
@@ -630,6 +630,57 @@ nav.steps a .dot.bad{cursor:pointer;box-shadow:0 0 0 3px var(--bad-bg)}
 .rp .rchart .rc-note{background:#f2f2f2;font-size:8.5px;color:#000;padding:1.5mm 2mm}
 @media (max-width:700px){.rchart{grid-template-columns:minmax(0,1fr)}}
 @media print{#repPrint .rp{border:1.3px solid #000;padding:7mm 9mm;font-size:9.3px}#repPrint .rp .ft{display:flex}#repPrint .rp h2{margin:2.2mm 0 1mm}#repPrint .rp table.rt td{padding:.45mm 1.4mm;font-size:9px}#repPrint .rp table.rt th{padding:.6mm 1.4mm;font-size:8.5px}#repPrint .rp .obs{font-size:8.8px;padding:1.5mm 2.5mm;margin:1.5mm 0}#repPrint .rp .firmas{margin-top:3mm}#repPrint .rp .ft{margin-top:2mm}#repPrint .rp .two table.rt td:first-child{white-space:nowrap}#repPrint .rp .two table.rt col.v{width:14mm}#repPrint .rp .two table.rt td{padding:.35mm 1.2mm;font-size:8.6px}#repPrint .rp .obs{font-size:8.4px;line-height:1.3}#repPrint .rp .prop-box{padding:2mm 3mm;margin:1.5mm 0}#repPrint .rp .hdx{margin-bottom:1.5mm}#repPrint .rp .meta{margin-bottom:1.5mm}}
+
+/* ===== UX11 · llenado progresivo y menos texto en «Datos» ===== */
+.prog-hid{display:none!important}
+.step.prog-on .ag-next{display:none!important}
+.prog-nav{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:4px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:var(--r);background:var(--layer2)}
+.prog-nav .pn-t{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+.prog-nav .pn-t b{font-size:13px}
+.prog-nav .pn-t span{font-size:12px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.prog-nav .btn{height:40px;padding:0 14px;font-size:13.5px}
+.prog-nav .btn[disabled]{opacity:.4}
+/* solo el texto necesario al llenar datos (la explicación queda en «Todo» y «Cálculo») */
+.step[data-focus="datos"] .intro,.step[data-focus="datos"] .body p.note,.step[data-focus="datos"] .field small,.step[data-focus="datos"] .lab-note,.step[data-focus="datos"] .block-h .note{display:none!important}
+body.calm .step>header .norma{display:none}
+body.calm .focus .fh{display:none}
+@media (max-width:640px){.prog-nav{grid-template-columns:1fr 1fr;padding:8px}.prog-nav .pn-t{grid-column:1/-1;order:-1}.prog-nav .btn{width:100%}}
+
+/* ===== UX10 · captura rápida en celular ===== */
+.mbar{display:none}
+@media (max-width:900px){
+  body.has-mbar{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .mbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--sheet);border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+  .mbar button{border:1px solid var(--line);background:var(--sheet);color:var(--ink);font:500 13.5px var(--f-body);min-height:44px;padding:0 10px;border-radius:10px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mbar .mb-prev{text-align:left}.mbar .mb-next{text-align:right;background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+  .mbar .mb-mid{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .mbar .mb-step{font:400 11px var(--f-data);color:var(--ink-3)}
+  .mbar .mb-save{min-height:30px;padding:0 12px;font-size:12.5px;border-color:var(--acc-line);color:var(--acc-d);background:var(--acc-soft)}
+  /* menos texto al llenar */
+  body.has-mbar .banner{display:none}
+  body.has-mbar .step footer{display:none}
+  .rotulo .acts .btn.pri[data-act="guardar"]{display:none}
+  .step[data-focus="datos"] .intro,.step[data-focus="datos"] .body p.note,.step[data-focus="datos"] .field small,.step[data-focus="datos"] .lab-note{display:none!important}
+  .step[data-focus="datos"] .fields{gap:10px}
+  .step[data-focus="datos"] .field .in,.step[data-focus="datos"] .in-c .in{min-height:46px;font-size:17px}
+  .step[data-focus="datos"] .field .lab{font-size:13.5px;font-weight:600}
+  .step .body{gap:14px}
+}
+@media (max-width:640px){
+  /* filas con varias entradas (Ensayo 1/2/3, pesadas): se apilan con el título de columna encima */
+  .step[data-focus="datos"] table.fz-d.fz-c thead{display:none}
+  .step[data-focus="datos"] table.fz-d.fz-c tr:has(.in-c ~ .in-c){display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:6px 8px;padding:8px 6px;border-bottom:1px solid var(--line-soft)}
+  .step[data-focus="datos"] table.fz-d.fz-c tr:has(.in-c ~ .in-c)>td{display:block;border:0;padding:0;background:transparent!important}
+  .step[data-focus="datos"] table.fz-d.fz-c tr:has(.in-c ~ .in-c)>td.t,.step[data-focus="datos"] table.fz-d.fz-c tr:has(.in-c ~ .in-c)>td.k{grid-column:1/-1;font-weight:600;font-size:13.5px}
+  .step[data-focus="datos"] table.fz-d.fz-c tr:has(.in-c ~ .in-c)>td.in-c::before{content:attr(data-h);display:block;font:400 11.5px var(--f-body);color:var(--ink-3);margin-bottom:2px}
+  .step[data-focus="datos"] table.fz-d.fz-c tr:has(.in-c ~ .in-c)>td:not(.in-c):not(.t):not(.k){display:none}
+  .step[data-focus="datos"] table.fz-d.fz-c tr:has(.in-c ~ .in-c) .in{width:100%;text-align:left}
+  /* una sola entrada por fila: etiqueta | campo, sin desplazamiento lateral */
+  .step[data-focus="datos"] table.fz-d.fz-c td.t,.step[data-focus="datos"] table.fz-d.fz-c td.k{white-space:normal}
+  .step[data-focus="datos"] .tw{overflow:visible}
+  .step[data-focus="datos"] table.fz-d.fz-c{width:100%;table-layout:fixed}
+  .step[data-focus="datos"] table.fz-d.fz-c td.in-c{width:38%}
+}
 
 /* ===== UX5 · plantilla clara «Cantera» ===== */
 :root{--acc:#A63D2F;--acc-d:#7F2A20;--acc-soft:#F9E6E2;--acc-line:#EBC3BB;--zebra:#FBF5F3;--side:#F8F3F1;--side-line:#E8DAD6;--danger:#c9463d;--danger-soft:#fdecea;--danger-line:#f3c2bd;
@@ -789,7 +840,7 @@ body.sinlab .lab-note{display:block}
   <div class="banner" id="demoBanner" hidden><button type="button" class="bx" id="bannerX" aria-label="Cerrar aviso">×</button>Ficha cargada con los ensayos del grupo · Cantera Allccomachay (setiembre – octubre 2026). Corrige cualquier valor en azul, o pulsa «Nueva ficha» para empezar en blanco.</div>
   <div class="navback" id="navback"></div>
   <div class="layout">
-    <nav class="steps" id="nav" aria-label="Pasos del diseño"></nav>
+    <nav class="steps" id="nav" aria-label="Pasos del diseño"></nav><div class="mbar" id="mbar" hidden><button type="button" class="mb-prev" id="mbPrev"></button><div class="mb-mid"><span class="mb-step" id="mbStep"></span><button type="button" class="mb-save" data-act="guardar">Guardar</button></div><button type="button" class="mb-next" id="mbNext"></button></div>
     <main id="main"></main>
     <aside class="res" id="res" aria-label="Resumen del diseño"></aside>
   </div>
@@ -7662,7 +7713,7 @@ let aggMode=LS.get('fdm-agg');if(!['fino','grueso','ambos'].includes(aggMode))ag
 function aggEff(f){const v=aggMode;return (f||focusMode)==='datos'?(v==='ambos'?'fino':v):v;}
 function focusBar(k){return `<div class="focus" role="tablist" aria-label="Vista del paso"><span class="fl">Ver</span>${FOCUS.map(([v,l])=>`<button type="button" role="tab" data-focus="${v}" aria-pressed="${focusMode===v}">${l}</button>`).join('')}${AGG_STEPS.includes(k)?`<span class="agg" role="group" aria-label="Agregado"><span class="agl">Agregado</span>${[['fino','Fino'],['grueso','Grueso'],['ambos','Ambos']].map(([v,l])=>`<button type="button" data-agg="${v}" aria-pressed="${aggMode===v}">${l}</button>`).join('')}</span>`:''}<p class="fh">${FOCUS_H[focusMode]}</p></div>`;}
 function aggClassify(sec){sec.querySelectorAll('.body .block').forEach(b=>{const h=b.querySelector('h3');const t=h?h.textContent.toLowerCase():'';if(/fino/.test(t))b.classList.add('ag-f');else if(/grueso/.test(t))b.classList.add('ag-g');});}
-function setAgg(v){if(!['fino','grueso','ambos'].includes(v))return;aggMode=v;LS.set('fdm-agg',v);applyFocus();try{const s=document.getElementById('sec_'+cur);if(s&&window.innerWidth<=900)s.scrollIntoView({block:'start'});}catch(e){}}
+function setAgg(v){if(!['fino','grueso','ambos'].includes(v))return;if(v!==aggMode)PROG[cur+':'+v]=0;aggMode=v;LS.set('fdm-agg',v);applyFocus();try{const s=document.getElementById('sec_'+cur);if(s&&window.innerWidth<=900)s.scrollIntoView({block:'start'});}catch(e){}}
 function aggNext(sec,ae){let d=sec.querySelector('.ag-next');if(ae==='ambos'){if(d)d.remove();return;}
   if(!d){d=document.createElement('div');d.className='ag-next';sec.querySelector('.body').appendChild(d);}
   d.innerHTML=ae==='fino'?'<span>Listo el agregado fino en este paso.</span><button type="button" data-agg="grueso">Llenar el agregado grueso →</button>':'<button type="button" data-agg="fino">← Volver al agregado fino</button><span>Ambos agregados llenados: sigue con el paso siguiente o revisa «Cálculo».</span>';}
@@ -7701,7 +7752,8 @@ function fzHeads(sec){// cabeceras de tabla acordes a las columnas visibles en �
   sec.querySelectorAll('table.fz-d.fz-c').forEach(t=>{const ths=t.querySelectorAll('thead th');const tr=t.querySelector('tbody tr');if(!tr||!ths.length)return;
     if(sec.dataset.focus!=='datos'){ths.forEach(h=>h.style.display='');return;}
     const tds=tr.children;if(tds.length!==ths.length||Array.from(tds).some(c=>c.colSpan>1)||Array.from(ths).some(h=>h.colSpan>1)){ths.forEach(h=>h.style.display='');return;}
-    ths.forEach((h,i)=>{h.style.display=getComputedStyle(tds[i]).display==='none'?'none':'table-cell';});});
+    ths.forEach((h,i)=>{h.style.display=getComputedStyle(tds[i]).display==='none'?'none':'table-cell';});
+    t.querySelectorAll('tbody tr').forEach(r=>{Array.from(r.children).forEach((c,i)=>{if(ths[i]&&!c.dataset.h)c.dataset.h=ths[i].textContent.trim();});});});
   // filas de solo cálculo (sin ninguna celda de ingreso) no se muestran en «Datos»
   sec.querySelectorAll('table.fz-d.fz-c tbody tr').forEach(r=>{if(sec.dataset.focus!=='datos'){r.style.display='';return;}
     if(r.querySelector('th'))return;r.style.display=r.querySelector('.in,.in-c,select,input')?'':'none';});}
@@ -7720,6 +7772,7 @@ function applyFocus(){
   const eff=(nAv>=2&&(focusMode==='todo'||avail[focusMode]))?focusMode:'todo';
   sec.dataset.focus=eff;fzHeads(sec);
   if(AGG_STEPS.includes(cur)){aggClassify(sec);const ae=aggEff(eff);sec.dataset.agg=ae;sec.querySelectorAll('.focus [data-agg]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.agg===ae));aggNext(sec,eff==='datos'?ae:'ambos');}
+  try{progApply(sec,eff);}catch(e){console.error(e);}
   sec.querySelectorAll('.focus [data-focus]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.focus===eff));
   const fh=sec.querySelector('.focus .fh');if(fh)fh.innerHTML=FOCUS_H[eff];
   if(eff==='todo')return;
@@ -7755,6 +7808,60 @@ function aditCatalog(){
   return `<div class="tw"><table class="f"><thead><tr><th>Tipo</th><th>Norma</th><th>Dosis usual<br>(% del cemento)</th><th>Reducción<br>de agua</th><th>Para qué sirve</th></tr></thead><tbody>${Object.entries(ADIT).filter(([k])=>k!=='OTRO').map(([k,a])=>`<tr><td class="t"><b>${a.n}</b></td><td class="t">${a.norma}</td><td>${isN(a.dosis)?fx(a.dosis,2)+' %':'—'}</td><td>${a.red?'≈ '+fx(a.red,0)+' %':'—'}</td><td class="t">${a.uso}<br><small>${a.req}</small></td></tr>`).join('')}</tbody></table></div>
   <p class="note"><b>Reglas de uso (NTE E.060 3.5 · ACI 211.1 · ASTM C494):</b> el aditivo debe cumplir la NTP/ASTM correspondiente y usarse en la dosis del fabricante, medida en volumen (mL por bolsa) con dosificador, nunca «a ojo». Se agrega disuelto en el agua de mezcla (los superplastificantes, al final del mezclado). No mezclar dos aditivos sin ensayo previo de compatibilidad. Con reductores de agua, el agua de tabla se reduce el porcentaje indicado y con ello baja el cemento para la misma a/c; con incorporadores de aire se usa la tabla de concreto con aire. Toda mezcla con aditivo se verifica con una tanda de prueba y probetas (NTP 339.034). Prohibido el cloruro de calcio en concreto armado o pretensado.</p>`;
 }
+
+// ===================== UX11: llenado progresivo =====================
+const PROG={},PROGN={};
+function progSections(sec){
+  const body=sec.querySelector('.body');if(!body)return [];
+  const vis=e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0};
+  const hasIn=e=>!!e.querySelector('.in,input:not([type=checkbox]),select');
+  let secs=Array.from(body.querySelectorAll('.block')).filter(b=>!b.classList.contains('prog-hid')&&vis(b)&&hasIn(b)&&!Array.from(b.querySelectorAll('.block')).some(n=>vis(n)&&hasIn(n)));
+  const top=Array.from(body.children).filter(c=>vis(c)&&!c.matches('.block,.cols,.cols3,.ag-next,.prog-nav')&&hasIn(c));
+  secs=secs.concat(top);
+  secs.sort((a,b)=>(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING)?-1:1);
+  return secs;
+}
+function progApply(sec,eff){
+  sec.querySelectorAll('.prog-hid').forEach(e=>e.classList.remove('prog-hid'));
+  const old=sec.querySelector('.prog-nav');if(old)old.remove();
+  sec.classList.remove('prog-on');
+  if(eff!=='datos')return;
+  const secs=progSections(sec);const key=cur+':'+(sec.dataset.agg||'');PROGN[key]=secs.length;
+  if(secs.length<2)return;
+  let i=PROG[key]||0;if(i>=secs.length)i=secs.length-1;if(i<0)i=0;PROG[key]=i;
+  secs.forEach((x,j)=>{if(j!==i)x.classList.add('prog-hid');});
+  sec.classList.add('prog-on');
+  const h=secs[i].querySelector('h3,h4');const title=h?h.textContent.trim():'';
+  const last=i===secs.length-1;const agg=AGG_STEPS.includes(cur)&&sec.dataset.agg==='fino';
+  const nav=document.createElement('div');nav.className='prog-nav';
+  nav.innerHTML=`<button type="button" class="btn ghost" data-prog="-1" ${i===0?'disabled':''}>‹ Anterior</button><span class="pn-t"><b>Sección ${i+1} de ${secs.length}</b><span>${esc(title)}</span></span><button type="button" class="btn pri" data-prog="1">${!last?'Siguiente ›':agg?'Agregado grueso ›':'Siguiente paso ›'}</button>`;
+  sec.querySelector('.body').appendChild(nav);
+}
+function progMove(d){
+  const sec=document.getElementById('sec_'+cur);if(!sec)return;const key=cur+':'+(sec.dataset.agg||'');const n=PROGN[key]||1;
+  let i=(PROG[key]||0)+d;
+  if(i<0){i=0;}
+  if(i>=n){
+    if(AGG_STEPS.includes(cur)&&sec.dataset.agg==='fino'){PROG[cur+':grueso']=0;setAgg('grueso');}
+    else{const idx=STEPS.findIndex(x=>x[0]===cur);if(idx>=0&&idx<STEPS.length-1){const nk=STEPS[idx+1][0];PROG[nk+':fino']=0;PROG[nk+':ambos']=0;PROG[nk+':']=0;go(nk);}}
+    return;}
+  PROG[key]=i;applyFocus();
+  const first=sec.querySelector('.body .block:not(.prog-hid) .in, .body .block:not(.prog-hid) input');
+  sec.scrollIntoView({block:'start',behavior:'smooth'});
+}
+
+// ===================== UX10: captura rápida en celular =====================
+function mbarUpdate(){const bar=document.getElementById('mbar');if(!bar)return;const mob=window.innerWidth<=900;bar.hidden=!mob||cur==='inicio';document.body.classList.toggle('has-mbar',mob&&cur!=='inicio');if(bar.hidden)return;
+  const i=STEPS.findIndex(x=>x[0]===cur);const prev=i>0?STEPS[i-1]:(i===0?['inicio','Inicio']:null),next=i>=0&&i<STEPS.length-1?STEPS[i+1]:null;
+  const bp=document.getElementById('mbPrev'),bn=document.getElementById('mbNext'),st=document.getElementById('mbStep');
+  bp.textContent=prev?'‹ '+prev[1]:'‹ Inicio';bp.dataset.go=prev?prev[0]:'inicio';
+  bn.textContent=next?next[1]+' ›':'';bn.hidden=!next;if(next)bn.dataset.go=next[0];
+  st.textContent=i>=0?`Paso ${i+1} de ${STEPS.length}`:(STEPS.concat(EXTRA).find(x=>x[0]===cur)||['',''])[1];}
+function nextInput(el){const sec=el.closest('.step')||document;const all=Array.from(sec.querySelectorAll('input.in,select.in,textarea.in,input[data-k],select[data-k]')).filter(x=>!x.disabled&&x.type!=='checkbox'&&x.offsetParent!==null);
+  const i=all.indexOf(el);return i>=0&&i<all.length-1?all[i+1]:null;}
+window.addEventListener('resize',()=>{try{mbarUpdate();}catch(e){}});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const el=e.target;if(!el||el.tagName==='TEXTAREA'||el.tagName==='BUTTON'||!(el.matches&&el.matches('input,select')))return;
+  const n=nextInput(el);if(n){e.preventDefault();n.focus();if(n.select)try{n.select();}catch(x){}n.scrollIntoView({block:'center',behavior:'smooth'});}else{el.blur();}});
 
 // ===================== UX8: ir al error =====================
 function errJump(target){// target: id de un contenedor de verificación, o clave de paso
@@ -7829,10 +7936,10 @@ function nico(k){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 function inicioStep(){
   return stepShell('inicio','Diseño de mezclas de concreto','Ficha de diseño · NTP 400.012 · ACI 211.1 · NTE E.060',`
     <div class="home">
-      <div class="home-hero"><h3>¿Cómo quieres empezar?</h3><p>Elige el camino según los datos que tengas. En cualquier momento puedes cambiar entre «con laboratorio» y «sin laboratorio» desde Parámetros.</p></div>
+      <div class="home-hero"><h3>¿Cómo quieres empezar?</h3><p>Según los datos que tengas. Puedes cambiar de modo después, en Parámetros.</p></div>
       <div class="home-opts">
-        <button type="button" class="home-opt" data-act="inicioLab"><span class="hi">${nico('lab')}</span><b>Con datos de laboratorio</b><span>Registras los ensayos del grupo (granulometría, humedad, peso unitario, Pe y absorción, cemento) y el diseño se calcula a partir de ellos, con verificación normativa.</span><em>Granulometría → Humedad → Peso unitario → Pe y absorción → Cemento → Diseño</em></button>
-        <button type="button" class="home-opt" data-act="inicioDir"><span class="hi">${nico('directo')}</span><b>Con datos ya establecidos</b><span>Escribes directamente TMN, módulo de finura, Pe, absorción, humedad y pesos unitarios (de un informe o ficha técnica) y pasas al diseño.</span><em>Propiedades → Parámetros → Métodos → Dosificación → Puesta en obra</em></button>
+        <button type="button" class="home-opt" data-act="inicioLab"><span class="hi">${nico('lab')}</span><b>Con datos de laboratorio</b><span>Registras los ensayos y el diseño sale de ellos, con verificación normativa.</span><em>Granulometría → Humedad → Peso unitario → Pe y absorción → Cemento → Diseño</em></button>
+        <button type="button" class="home-opt" data-act="inicioDir"><span class="hi">${nico('directo')}</span><b>Con datos ya establecidos</b><span>Escribes TMN, módulo de finura, Pe, absorción, humedad y pesos unitarios, y pasas al diseño.</span><em>Propiedades → Parámetros → Métodos → Dosificación → Puesta en obra</em></button>
       </div>
       <div class="home-cur" id="o_inicio"></div>
       <div class="home-more"><button type="button" class="btn ghost" data-act="ejemplo">Cargar ejemplo · Allccomachay</button><button type="button" class="btn ghost" data-go="historial">Abrir una ficha guardada</button><button type="button" class="btn ghost" data-act="importar">Importar archivo .json</button></div>
@@ -7994,7 +8101,7 @@ function eqDos(m,D){
 
 function go(k,scroll=true){
   if(!document.getElementById('sec_'+k))k='granulometria';
-  cur=k;document.querySelectorAll('.step').forEach(s=>s.hidden=s.id!=='sec_'+k);if(k!=='inicio')LS.set('fdm-last',k);try{inicioRender();}catch(e){}
+  cur=k;document.querySelectorAll('.step').forEach(s=>s.hidden=s.id!=='sec_'+k);if(k!=='inicio')LS.set('fdm-last',k);try{inicioRender();}catch(e){}try{mbarUpdate();}catch(e){}
   if(k==='expediente'&&R)setHTML('o_exp',expediente());
   document.querySelectorAll('nav.steps a').forEach(a=>{if(a.dataset.go===k)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   const cg=navGroupOf(k);if(cg){navToggle(cg,true);document.querySelectorAll('nav.steps .ng').forEach(e=>e.classList.toggle('cur',e.id==='ng_'+cg));}
@@ -8053,6 +8160,7 @@ function init(){
   document.addEventListener('click',async e=>{
     const ngh=e.target.closest('[data-ng]');if(ngh){navToggle(ngh.dataset.ng);return;}
     const ge=e.target.closest('[data-act^="goErr:"]');if(ge){errJump(ge.dataset.act.split(':')[1]);return;}
+    const pb=e.target.closest('[data-prog]');if(pb){progMove(+pb.dataset.prog);return;}
     const g=e.target.closest('[data-go]');if(g){e.preventDefault();const mn=g.closest('details.menu');if(mn)mn.open=false;if(e.target.closest('.dot.bad')){errJump(g.dataset.go);return;}go(g.dataset.go);return;}
     if(!e.target.closest('details.menu'))document.querySelectorAll('details.menu[open]').forEach(d=>d.open=false);
     const gb=e.target.closest('[data-glb]');if(gb){GLB.handle(gb.dataset.glb);return;}
