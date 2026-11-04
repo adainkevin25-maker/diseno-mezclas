@@ -1,13 +1,15 @@
-DISEÑO DE MEZCLAS · versión para celular (PWA)
+SICMAT · opción B · versión para celular (app web instalable)
 
-Estos 5 archivos (index.html, manifest.json, sw.js, icon-192.png, icon-512.png) se suben
-tal cual a una carpeta publicada en internet (GitHub Pages es gratis). Luego, en el celular:
-Chrome → abrir la dirección → menú ⋮ → «Agregar a pantalla de inicio» (o «Instalar app»).
-Queda como app con ícono propio, abre a pantalla completa y funciona sin internet.
+1. En tu repositorio de GitHub (diseno-mezclas) pulsa  Add file → Upload files.
+2. Arrastra la CARPETA  opcion-b  completa (index.html, manifest.json, sw.js, icon-192.png, icon-512.png y la carpeta pyodide)
+   y pulsa Commit. Debe quedar  diseno-mezclas/opcion-b/index.html
+3. Dirección:  https://adainkevin25-maker.github.io/diseno-mezclas/opcion-b/
+4. En el celular: Chrome → ⋮ → «Instalar app». Se instala aparte con el nombre SICMAT.
 
-Cómo publicarla en GitHub Pages (una sola vez, 5 minutos):
-1. Crea una cuenta en github.com y un repositorio nuevo llamado  diseno-mezclas  (público).
-2. En el repositorio: «Add file → Upload files», arrastra los 5 archivos y pulsa «Commit changes».
-3. Settings → Pages → Branch: main, carpeta / (root) → Save.
-4. En un minuto la app queda en  https://TU-USUARIO.github.io/diseno-mezclas/
-Para actualizarla, vuelve a subir index.html.
+Las dos opciones (Diseño de Mezclas y SICMAT) comparten cuentas y fichas en el mismo teléfono,
+porque están en la misma dirección. Sube también el sw.js nuevo de la opción A (en la raíz),
+que ya no borra el almacenamiento sin conexión de la opción B.
+
+Motor de cálculo: Python (Pyodide). La carpeta  pyodide  (unos 13 MB) es obligatoria. El celular la
+descarga la primera vez y la guarda: después funciona sin internet. La barra inferior (en PC) dice
+«Cálculo: Python 3.14».
