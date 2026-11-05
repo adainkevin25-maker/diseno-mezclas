@@ -7604,7 +7604,7 @@ function demoState(){return {
   meta:{proyecto:"Diseño de mezcla de concreto f'c = 210 kg/cm² – Método ACI 211.1",resp:'Espinoza Jayo, Adain Kevin',solicitante:'Msc. Ing. Vilchez Peña, Angel Hugo',muestra:'M-01',
     canteraF:'Cantera Allccomachay',canteraG:'Cantera Allccomachay',fecha:'Setiembre – octubre 2026',uso:'Concreto estructural',integrantes:INTEGRANTES,
     lab:'Universidad Nacional de San Cristóbal de Huamanga · Facultad de Ingeniería de Minas, Geología y Civil · Escuela Profesional de Ingeniería Civil',lab2:'Laboratorio de Tecnología del Concreto',lugar:'Ayacucho',cip:'',obs:'Se recomienda verificar el diseño con la toma de 03 especímenes en coladas preparadas con la dosificación indicada, con agregados acumulados en obra, y realizar ensayos de resistencia a la compresión simple (NTP 339.034).'},
-  exp:{memo:true,lab:true,obra:true,tablas:true,met:'adoptado',metSel:{}},
+  exp:{memo:true,lab:true,obra:true,tablas:true,memoDos:true,met:'adoptado',metSel:{}},
   // Informe 2 · granulometría (g). null = tamiz sin dato
   gF:{ini:500,ret:[0,0,0,0,null,null,2.4,9.2,20.4,49.8,129.1,164.8,116.2,0,4.0]},
   gG:{ini:5002,ret:[0,0,0,0,39,3370,1512.5,77,0,0,0,0,null,0,2]},
@@ -8463,6 +8463,7 @@ function buildMain(){
         <label><input type="checkbox" data-k="exp.memo" ${S.exp.memo?'checked':''}> Incluir memoria de cálculo paso a paso</label>
         <label><input type="checkbox" data-k="exp.lab" ${S.exp.lab?'checked':''}> Incluir ensayos de laboratorio en la memoria</label>
         <label><input type="checkbox" data-k="exp.obra" ${S.exp.obra?'checked':''}> Incluir tanda de prueba y volumen de obra</label>
+        <label><input type="checkbox" data-k="exp.memoDos" ${S.exp.memoDos!==false?'checked':''}> Incluir en la memoria el cálculo de la dosificación en obra (recipientes, equipos y desperdicio)</label>
         <label><input type="checkbox" data-k="exp.tablas" ${S.exp.tablas!==false?'checked':''}> Incluir las tablas usadas en el proceso (con la celda leída marcada)</label></span></label>
       <div class="field" style="grid-column:1/-1"><span class="lab">Observación final</span>${ta('meta.obs',{rows:2,label:'Observación'})}</div>
     </div>
@@ -9099,9 +9100,14 @@ function memoria(k){
     <div class="eq">Agua efectiva = ${fx(m.agua,1)} − (${fx(m.apF,2)}) − (${fx(m.apG,2)}) = <b>${fx(m.Wef,1)} L/m³</b></div>`);
   sec.push(H('Proporciones de obra')+`<div class="eq">En peso: ${fx(m.C,1)}/${fx(m.C,1)} : ${fx(m.WfH,1)}/${fx(m.C,1)} : ${fx(m.WgH,1)}/${fx(m.C,1)} → <b>1 : ${fx(m.pF)} : ${fx(m.pG)} / ${fx(m.aB,1)} L por bolsa</b></div>
     <div class="eq">En volumen: <b>1 : ${fx(m.vF)} : ${fx(m.vG)} / ${fx(m.aB,1)} L por bolsa</b></div>`);
+  if(S.exp.memoDos!==false){const DR=dosRecip(m);const pm=despPor(),pc=k=>fx((despF(k)-1)*100,0);
+    let t=dosRecipCalc(m,DR).map(x=>`<div class="eq">${x}</div>`).join('');
+    t+=pm?`<p>Desperdicio por material (solo cambia la cantidad a comprar; la proporción y la receta por bolsa no cambian):</p><div class="eq">Cemento ${fx(m.C,1)} × ${fx(despF('cem'),2)} = <b>${fx(m.C*despF('cem'),1)} kg/m³</b> · agua ${fx(m.Wef,1)} × ${fx(despF('agua'),2)} = <b>${fx(m.Wef*despF('agua'),1)} L/m³</b></div><div class="eq">Arena ${fx(m.WfH,1)} × ${fx(despF('arena'),2)} = <b>${fx(m.WfH*despF('arena'),1)} kg/m³</b> · piedra ${fx(m.WgH,1)} × ${fx(despF('piedra'),2)} = <b>${fx(m.WgH*despF('piedra'),1)} kg/m³</b></div><p>Porcentajes: cemento ${pc('cem')} % · arena ${pc('arena')} % · piedra ${pc('piedra')} % · agua ${pc('agua')} %. El volumen de concreto a preparar se calcula con el del cemento.</p>`
+      :`<p>Desperdicio general de ${pc('cem')} %: multiplica por ${fx(despF('cem'),2)} todas las cantidades, por eso la proporción 1 : ${fx(m.pF)} : ${fx(m.pG)} no cambia.</p>`;
+    sec.push(H('Dosificación en obra por recipiente y equipo')+t);}
   {const O=R.obra;if(isN(O.Vtot)){let t=`<div class="eq">Volumen de obra = ${S.obra.modo==='dir'?fx(O.Vobra,2):`${fx(S.obra.L,2)} × ${fx(S.obra.A,2)} × ${fx(S.obra.e,2)} = ${fx(O.Vobra,2)}`} m³${O.panos?' ('+O.panos+' paños)':''} → con ${fx(O.desp,0)} % de desperdicio: <b>${fx(O.Vtot,2)} m³</b></div>`;
     if(isN(O.Vh))t+=`<div class="eq">Hormigonera: V = ${S.obra.horm.modo==='hip'?`π · ${fx(S.obra.horm.k,2)}² · (1/${fx(S.obra.horm.x1,2)} − 1/${fx(S.obra.horm.x2,2)})`:'capacidad'} = <b>${fx(O.Vh,3)} m³</b> → viajes = ${fx(O.Vtot,2)} / ${fx(O.Vh,3)} = <b>${O.viajes}</b></div>`;
-    t+=`<div class="eq">Materiales totales: cemento ${fx(m.C*O.Vtot,0)} kg (${Math.ceil(m.C*O.Vtot/d.bolsa)} bolsas) · agua ${fx(m.Wef*O.Vtot,0)} L · fino húmedo ${fx(m.WfH*O.Vtot,0)} kg · grueso húmedo ${fx(m.WgH*O.Vtot,0)} kg</div>`;
+    {const V=O.Vobra,fc=despF('cem');t+=`<div class="eq">Materiales totales: cemento ${fx(m.C*V*fc,0)} kg (${Math.ceil(m.C*V*fc/d.bolsa-1e-9)} bolsas) · agua ${fx(m.Wef*V*despF('agua'),0)} L · fino húmedo ${fx(m.WfH*V*despF('arena'),0)} kg · grueso húmedo ${fx(m.WgH*V*despF('piedra'),0)} kg</div>`;}
     sec.push(H('Volumen de obra y hormigonera')+t);}}
   return sec.join('');
 }
@@ -9771,6 +9777,21 @@ function dosRecipChecks(){const U=S.dosU||{};const it=[['lata','Lata'],['balde',
 /* factor de desperdicio de un material: 'cem' · 'arena' · 'piedra' · 'agua' (general = el mismo % para todos) */
 function despF(k){const o=S.obra||{};if(o.despModo==='material'&&o.despM&&isN(o.despM[k]))return 1+o.despM[k]/100;return 1+(isN(o.desp)?o.desp:0)/100;}
 function despPor(){return (S.obra||{}).despModo==='material';}
+/* Antes de imprimir: mide cada hoja con los estilos de impresión (copiados a un contenedor oculto) y,
+   si no entra en el A4, la reduce un poco (zoom, máx. 15 %) para que su pie y las firmas no pasen a otra página. */
+function ajustarHojas(pr){
+  const MM=96/25.4,altoUtil=(297-14-16)*MM-6,ancho=(210-16-16)*MM;
+  if(!document.getElementById('cssMedir')){const out=[];
+    for(const sh of Array.from(document.styleSheets)){let rules;try{rules=sh.cssRules;}catch(e){continue;}
+      for(const r of Array.from(rules||[])){if(r.type===4&&/print/.test(r.media.mediaText))for(const x of Array.from(r.cssRules))if(x.selectorText&&x.selectorText.split(',').every(q=>/^\s*#repPrint\b/.test(q)))out.push(x.cssText.replace(/#repPrint/g,'#repMedir'));}}
+    const st=document.createElement('style');st.id='cssMedir';st.textContent='@media screen{'+out.join('\n')+'}';document.head.appendChild(st);}
+  let m=document.getElementById('repMedir');if(!m){m=document.createElement('div');m.id='repMedir';document.body.appendChild(m);}
+  m.style.cssText=`position:absolute;left:-20000px;top:0;width:${ancho}px;display:block;visibility:hidden`;m.innerHTML=pr.innerHTML;
+  const hs=Array.from(m.querySelectorAll('.rp')),ps=Array.from(pr.querySelectorAll('.rp'));
+  hs.forEach((h,i)=>{const alto=h.getBoundingClientRect().height;if(!ps[i])return;ps[i].style.zoom='';
+    // solo hojas de una página que se pasan un poco (la memoria y los ensayos ocupan varias páginas a propósito)
+    if(alto>altoUtil*0.96&&alto<altoUtil*1.2)ps[i].style.zoom=String(Math.max(0.85,altoUtil*0.94/alto).toFixed(3));});
+  m.innerHTML='';}
 /* costo de materiales por m³ de un método (mismas fórmulas que R.cost, que solo se calcula para el método adoptado) */
 function costoDe(m){const c=S.cost||{},P=R.P||{},d=S.d,K={};if(!m||!m.ok)return K;
   const hF=isN(P.hF)?P.hF:0,hG=isN(P.hG)?P.hG:0;
@@ -9792,7 +9813,8 @@ function expediente(){
     <div class="meta"><b>Institución</b><span>${esc(mt.lab||'—')}${mt.lab2?' · '+esc(mt.lab2):''}</span><b>Fecha</b><span>${esc(mt.fecha||'—')}</span><b>Cantera · fino</b><span>${esc(mt.canteraF||'—')}</span><b>Uso</b><span>${esc(mt.uso||'—')}</span><b>Cantera · grueso</b><span>${esc(mt.canteraG||'—')}</span><b>Lugar</b><span>${esc(mt.lugar||'—')}</span>${conInteg&&integ.length?`<b>Integrantes</b><ul class="rp-integ">${integ.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul>`:''}</div>`;
   const ft=(t)=>`<div class="ft"><span>Diseño de mezclas · NTE E.060 / ACI 211.1 · ${esc(t)}</span><span class="pgn"></span></div>`;
   const page=(body,t)=>{pages.push(`<div class="rp">${body}${ft(t)}</div>`);};
-  const r2=(l,a,b)=>`<tr><td>${l}</td><td>${a}</td><td>${b}</td><td></td><td class="u"></td></tr>`;   // tabla 7: peso | volumen, cada uno en su columna
+  const r2=(l,a,b)=>`<tr><td>${l}</td><td>${a}</td><td>${b}</td></tr>`;   // tablas de 3 columnas (7 y costo)
+  const CG3='<colgroup><col><col class="v"><col class="v"></colgroup>';   // tabla 7: peso | volumen, cada uno en su columna
   const r3=(l,a,b,c,u)=>{const z=x=>x==null||x===''?'—':x;return `<tr><td>${l}</td><td>${z(a)}</td><td>${z(b)}</td><td>${z(c)}</td><td class="u">${u||''}</td></tr>`;};   // tabla 1: cada valor en su columna (grava · arena · cemento)
   const r=(l,a,b,c,u)=>{const v=[a,b,c].filter(x=>x!=null&&x!=='');let cells='';if(v.length===3)cells=`<td>${a}</td><td>${b}</td><td>${c}</td>`;else if(v.length===2)cells=`<td colspan="2">${v[0]}</td><td>${v[1]}</td>`;else if(v.length===1)cells=`<td colspan="3">${v[0]}</td>`;else cells='<td colspan="3"></td>';return `<tr><td>${l}</td>${cells}<td class="u">${u||''}</td></tr>`;};
   const CG='<colgroup><col><col class="v"><col class="v"><col class="v"><col class="u"></colgroup>';
@@ -9808,7 +9830,7 @@ function expediente(){
     ${r3('Tamaño máximo nominal · tamaño máximo',TL[R.tmn]+' · '+TL[R.tm],'—','','')}${r3('Módulo de finura',fx(R.mfG,2),fx(R.mfF,2),'','')}${r3('Absorción',fx(P.absG,2),fx(P.absF,2),'','%')}${r3('Contenido de humedad',fx(P.hG,2),fx(P.hF,2),'','%')}
     ${r3('Tipo de cemento · peso por bolsa','—','—','Tipo '+esc(d.cemTipo||'—')+' · '+fx(d.bolsa,1)+' kg','')}${r('Propiedades obtenidas de','','',R.dOn?'ingreso directo':'ensayos NTP 400.012 · 339.185 · 400.017 · 400.021/022','')}</tbody></table>`;
   const acRows=`${isN(du.acMax)?r('Relación a/c máxima por durabilidad (E.060 cap. 4)',fx(du.acMax,2),'','','')+(du.cem?r('Cemento requerido por sulfatos (E.060 Tabla 4.4)','Tipo '+du.cem,'','',''):''):''}`;
-  h1+=`<h2>2. Características del concreto</h2><table class="rt">${CG}<thead><tr><th>Parámetro</th><th>Valor</th><th></th><th></th><th></th></tr></thead><tbody>
+  h1+=`<h2>2. Características del concreto</h2><table class="rt">${CG}<thead><tr><th>Parámetro</th><th colspan="3">Valor</th><th></th></tr></thead><tbody>
     ${F.n?r('Registro de ensayos · n · desviación estándar · coef. de variación',F.n+' · '+fx(F.s,1)+' · '+fx(R.reg.cv,1)+' %','','',''):r('Registro de ensayos','Tabla ACI 318','','','')}
     ${ri("Resistencia característica f'c",fx(d.fc,0),fx(d.fc/MPA,2)+' MPa','','kg/cm²')}${r("Resistencia promedio requerida f'cr",fx(F.fcr,0),fx(F.fcr*14.223,0)+' psi',F.crit==='tabla'?"f'c "+esc(F.inc||''):F.crit==='z'?'z = '+fx(F.z,2):F.crit==='control'?fx(F.ctrl,1)+" f'c":'E.060 5.3.2.1','kg/cm²')}
     ${ri('Asentamiento · consistencia',slumpIn,slumpMm+' mm',SLUMP[d.slump].split(' · ')[1],'')}${r('Agua de diseño ('+(D.variant==='t203'?'Tabla 2.03':'Tabla N°3')+')',fx(D.agua,0),'','','L/m³')}
@@ -9817,11 +9839,11 @@ function expediente(){
     ${k==='aci'?r('Volumen de agregado grueso b/b₀ (Tabla 2.05)',fx(m.bb0,3),'× '+fx(P.pucG,0)+' = '+fx(m.Wg,0)+' kg/m³','',''):k==='mfc'?r('Módulo de finura de la combinación m (Tabla 7.2)',fx(m.m,3),'fino '+fx(finoPct,1)+' %','',''):r('Agregado fino sobre el volumen de agregados',fx(finoPct,1),'','','%')}
     ${r((d.aire==='con'?'Aire total incorporado':'Aire atrapado')+(d.aire==='con'?' · '+EXPO[d.expo].split(' · ')[0]:''),fx(D.aire,1),'','','%')}</tbody></table>`;
   h1+=`<div class="two"><div><h2>3. Volúmenes absolutos</h2><table class="rt">${CG}<tbody>
-    ${r('Cemento',fx(D.Vc,4),'','','m³')}${r('Agua',fx(D.Vw,4),'','','m³')}${r('Aire',fx(D.Va,4),'','','m³')}${r('Grava',fx(m.Vg,4),'','','m³')}${r('Arena',fx(m.Vf,4),'','','m³')}<tr class="tot"><td>Total</td><td>${fx(D.Vc+D.Vw+D.Va+m.Vg+m.Vf,3)}</td><td></td><td></td><td class="u">m³</td></tr></tbody></table></div>
+    ${r('Cemento',fx(D.Vc,4),'','','m³')}${r('Agua',fx(D.Vw,4),'','','m³')}${r('Aire',fx(D.Va,4),'','','m³')}${r('Grava',fx(m.Vg,4),'','','m³')}${r('Arena',fx(m.Vf,4),'','','m³')}<tr class="tot"><td>Total</td><td colspan="3">${fx(D.Vc+D.Vw+D.Va+m.Vg+m.Vf,3)}</td><td class="u">m³</td></tr></tbody></table></div>
     <div><h2>4. Materiales por m³</h2><table class="rt">${CG}<thead><tr><th>Material</th><th>Seco</th><th>Corregido</th><th>${despPor()?'Con desp.':'+'+fx(DSP,0)+' % desp.'}</th><th></th></tr></thead><tbody>
     ${(()=>{const pm=despPor(),t=(n,k)=>pm?n+' (+'+fx((despF(k)-1)*100,0)+' %)':n;return r(t('Cemento','cem'),fx(m.C,1),fx(m.C,1),fx(m.C*despF('cem'),1),'kg')+r(t('Agua','agua'),fx(m.agua,1),fx(m.Wef,1),fx(m.Wef*despF('agua'),1),'L')+r(t('Grava','piedra'),fx(m.Wg,1),fx(m.WgH,1),fx(m.WgH*despF('piedra'),1),'kg')+r(t('Arena','arena'),fx(m.Wf,1),fx(m.WfH,1),fx(m.WfH*despF('arena'),1),'kg');})()}<tr class="tot"><td>Peso unitario</td><td>${fx(m.pesoU,0)}</td><td>${fx(m.pesoUh,0)}</td><td>—</td><td class="u">kg/m³</td></tr></tbody></table></div></div>`;
   h1+=`<h2>5. Corrección del agua por humedad de los agregados</h2><table class="rt">${CG}<tbody>
-    ${r('Grava · '+fx(m.Wg,0)+' × ('+fx(P.hG)+' − '+fx(P.absG)+') / 100',fx(m.apG,2),'','','L')}${r('Arena · '+fx(m.Wf,0)+' × ('+fx(P.hF)+' − '+fx(P.absF)+') / 100',fx(m.apF,2),'','','L')}${r('Agua libre aportada por los agregados',fx(m.apF+m.apG,2),'','','L')}<tr class="tot"><td>Agua efectiva = ${fx(m.agua,0)} − (${fx(m.apF+m.apG,2)})</td><td>${fx(m.Wef,1)}</td><td></td><td></td><td class="u">L/m³</td></tr></tbody></table>`;
+    ${r('Grava · '+fx(m.Wg,0)+' × ('+fx(P.hG)+' − '+fx(P.absG)+') / 100',fx(m.apG,2),'','','L')}${r('Arena · '+fx(m.Wf,0)+' × ('+fx(P.hF)+' − '+fx(P.absF)+') / 100',fx(m.apF,2),'','','L')}${r('Agua libre aportada por los agregados',fx(m.apF+m.apG,2),'','','L')}<tr class="tot"><td>Agua efectiva = ${fx(m.agua,0)} − (${fx(m.apF+m.apG,2)})</td><td colspan="3">${fx(m.Wef,1)}</td><td class="u">L/m³</td></tr></tbody></table>`;
   page(h1,'Hoja 1 · Cálculo del diseño'+(multi?' · '+MNAME[k]:''));
   // ---------- Hoja 2 · dosificación ----------
   let h2=hd(fcTxt+' · Dosificación'+(multi?' · Método '+MNAME[k]:''));
@@ -9829,21 +9851,21 @@ function expediente(){
     ${isN(m.vF)?`<div class="prop-box"><span class="k">Proporción en volumen (pie³) · cemento : arena : piedra / agua</span><span class="v">1 : ${fx(m.vF)} : ${fx(m.vG)} / ${fx(m.aB,1)} L</span></div>`:''}`;
   h2+=`<div class="two"><div><h2>6. Dosificación por m³ en volumen</h2><table class="rt">${CG}<tbody>
     ${r('Cemento',fx(D.bolsas,2),'','','bolsas')}${isN(m.pieG)?r('Grava ('+fx(m.WgH,0)+' kg ÷ '+fx(m.pieG,1)+')',fx(m.WgH/m.pieG,2),'','','pie³'):''}${isN(m.pieF)?r('Arena ('+fx(m.WfH,0)+' kg ÷ '+fx(m.pieF,1)+')',fx(m.WfH/m.pieF,2),'','','pie³'):''}${r('Agua efectiva',fx(m.Wef,1),'','','L')}</tbody></table></div>
-    <div><h2>7. Dosificación por bolsa de cemento</h2><table class="rt">${CG}<thead><tr><th>Material</th><th>Peso</th><th>Volumen</th><th></th><th></th></tr></thead><tbody>
+    <div><h2>7. Dosificación por bolsa de cemento</h2><table class="rt">${CG3}<thead><tr><th>Material</th><th>Peso</th><th>Volumen</th></tr></thead><tbody>
     ${r2('Cemento',fx(d.bolsa,1)+' kg','1 pie³')}${r2('Grava (húmeda)',fx(m.WgH/D.bolsas,1)+' kg',isN(m.vG)?fx(m.vG,2)+' pie³':'—')}${r2('Arena (húmeda)',fx(m.WfH/D.bolsas,1)+' kg',isN(m.vF)?fx(m.vF,2)+' pie³':'—')}${r2('Agua (efectiva)',fx(m.aB,1)+' kg',fx(m.aB,1)+' L')}${m.ad?r2(esc(d.adNombre||'Aditivo'),fx(m.ad/D.bolsas,3)+' kg','—'):''}</tbody></table></div></div>`;
   {const K=costoDe(m);const lata=isN(S.cost.lata)?S.cost.lata:18.9,pie=28.3168;   // costo con las cantidades de ESTE método (antes repetía el del método adoptado)
     {const DR=dosRecip(m);const cs=DR.cols;
     h2+=`<div class="two"><div>${cs.length?`<h2>Dosificación en obra por ${cs.length===1?cs[0].n.toLowerCase()+' de '+fx(cs[0].cap,Number.isInteger(cs[0].cap)?0:1)+' L':'recipiente (por bolsa)'}</h2><table class="rt">${cs.length>1?`<thead><tr><th>Material</th>${cs.map(c=>`<th>${c.n}<br>${fx(c.cap,Number.isInteger(c.cap)?0:1)} L</th>`).join('')}</tr></thead>`:''}<tbody>${DR.rows.map(r=>`<tr><td>${r.l}</td>${r.l==='Cemento'?cs.map(()=>'<td>1 bolsa</td>').join(''):r.v.map(v=>`<td>${isN(v)?fx(v,1):'—'}</td>`).join('')}${cs.length===1?`<td class="u">${r.l==='Cemento'?'':cs[0].n.toLowerCase()+'s'}</td>`:''}</tr>`).join('')}</tbody></table>`:''}
 </div>
-      ${isN(K.total)?`<div><h2>Costo de materiales por m³</h2><table class="rt">${CG}<tbody>${r('Cemento',fx(m.C/d.bolsa,2)+' bls','S/ '+fx(K.cem,2),'','')}${r('Arena',fx(K.vF,3)+' m³','S/ '+fx(K.arena,2),'','')}${r('Piedra',fx(K.vG,3)+' m³','S/ '+fx(K.piedra,2),'','')}${r('Agua',fx(m.Wef/1000,3)+' m³','S/ '+fx(K.agua,2),'','')}${m.ad?r(esc(d.adNombre||'Aditivo'),fx(m.ad,2)+' kg','S/ '+fx(K.ad,2),'',''):''}<tr class="tot"><td>Total por m³</td><td colspan="3">S/ ${fx(K.total,2)}</td><td class="u"></td></tr></tbody></table></div>`:''}</div>`;
+      ${isN(K.total)?`<div><h2>Costo de materiales por m³</h2><table class="rt">${CG3}<thead><tr><th>Material</th><th>Cantidad</th><th>Costo</th></tr></thead><tbody>${r2('Cemento',fx(m.C/d.bolsa,2)+' bls','S/ '+fx(K.cem,2))}${r2('Arena',fx(K.vF,3)+' m³','S/ '+fx(K.arena,2))}${r2('Piedra',fx(K.vG,3)+' m³','S/ '+fx(K.piedra,2))}${r2('Agua',fx(m.Wef/1000,3)+' m³','S/ '+fx(K.agua,2))}${m.ad?r2(esc(d.adNombre||'Aditivo'),fx(m.ad,2)+' kg','S/ '+fx(K.ad,2)):''}<tr class="tot"><td colspan="2">Total por m³</td><td>S/ ${fx(K.total,2)}</td></tr></tbody></table></div>`:''}</div>`;
     if(DR.mixer||DR.volq)h2+=`<div class="two"><div>${DR.mixer?`<h2>Por camión mixer de ${fx(DR.mixer.cap,1)} m³</h2><table class="rt">${CG}<tbody>${r('Cemento',fx(DR.mixer.bolsas,1),'','','bolsas')}${r('Arena húmeda (suelta)',isN(DR.mixer.vF)?fx(DR.mixer.vF,2):'—','','','m³')}${r('Piedra húmeda (suelta)',isN(DR.mixer.vG)?fx(DR.mixer.vG,2):'—','','','m³')}${r('Agua efectiva',fx(DR.mixer.agua,0),'','','L')}</tbody></table>`:''}</div><div>${DR.volq?`<h2>Un volquete de ${fx(DR.volq.cap,0)} m³ alcanza para</h2><table class="rt">${CG}<tbody>${r('Arena húmeda (suelta)',isN(DR.volq.conF)?fx(DR.volq.conF,1):'—','','','m³ de concreto')}${r('Piedra húmeda (suelta)',isN(DR.volq.conG)?fx(DR.volq.conG,1):'—','','','m³ de concreto')}</tbody></table>`:''}</div></div>`;
-    h2+=`${(cs.length||DR.mixer||DR.volq)?`<p class="dos-calc-rp"><b>Cálculo:</b> ${dosRecipCalc(m,DR,true).join(' · ')}</p>`:''}`;}}
-  h2+=`<h2>8. Pesos secos y húmedos por m³</h2><table class="rt">${CG}<thead><tr><th>Material</th><th>Seco (kg)</th><th>Humedad (%)</th><th>Húmedo (kg)</th><th></th></tr></thead><tbody>
-    ${r('Cemento',fx(m.C,1),'—',fx(m.C,1),'')}${r('Grava',fx(m.Wg,1),fx(P.hG,2),fx(m.WgH,1),'')}${r('Arena',fx(m.Wf,1),fx(P.hF,2),fx(m.WfH,1),'')}${r('Agua',fx(m.agua,1)+' L','—',fx(m.Wef,1)+' L','')}</tbody></table>`;
+}}
+  h2+=`<h2>8. Pesos secos y húmedos por m³</h2><table class="rt"><colgroup><col><col class="v"><col class="v"><col class="v"></colgroup><thead><tr><th>Material</th><th>Seco (kg)</th><th>Humedad (%)</th><th>Húmedo (kg)</th></tr></thead><tbody>
+    ${[['Cemento',fx(m.C,1),'—',fx(m.C,1)],['Grava',fx(m.Wg,1),fx(P.hG,2),fx(m.WgH,1)],['Arena',fx(m.Wf,1),fx(P.hF,2),fx(m.WfH,1)],['Agua',fx(m.agua,1)+' L','—',fx(m.Wef,1)+' L']].map(x=>`<tr>${x.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   if(ex.obra!==false&&k===R.adopt){const t=S.tanda,O=R.obra;const Vp=isN(t.d)&&isN(t.h)?Math.PI/4*Math.pow(t.d/100,2)*(t.h/100):null;const Vt=isN(Vp)&&isN(t.n)?Vp*t.n*(1+(isN(t.desp)?t.desp:0)/100):null;
     let t2='';
     if(isN(Vt))t2+=`<div><h2>9. Tanda de prueba · ${t.n} probetas de ${fx(t.d,0)} × ${fx(t.h,0)} cm</h2><table class="rt">${CG}<tbody>${r('Volumen (+'+fx(t.desp,0)+' % desp.)',fx(Vt,4),'','','m³')}${r('Cemento',fx(m.C*Vt,2),'','','kg')}${r('Agua efectiva',fx(m.Wef*Vt,2),'','','L')}${r('Arena húmeda',fx(m.WfH*Vt,2),'','','kg')}${r('Grava húmeda',fx(m.WgH*Vt,2),'','','kg')}</tbody></table></div>`;
-    if(isN(O.Vtot))t2+=`<div><h2>${isN(Vt)?'10':'9'}. Volumen de obra y hormigonera</h2><table class="rt">${CG}<tbody>${r('Volumen de obra'+(O.panos?' · '+O.panos+' paños':''),fx(O.Vobra,2),'','','m³')}${r('Con '+fx(O.desp,0)+' % de desperdicio',fx(O.Vtot,2),'','','m³')}${isN(O.Vh)?r('Capacidad de la hormigonera',fx(O.Vh,3),'','','m³')+r('Viajes necesarios',O.viajes,'','',''):''}${r('Cemento total',fx(m.C*O.Vtot,0)+' kg',Math.ceil(m.C*O.Vtot/d.bolsa)+' bolsas','','')}${r('Agua · arena · grava totales',fx(m.Wef*O.Vtot,0)+' L',fx(m.WfH*O.Vtot,0)+' kg',fx(m.WgH*O.Vtot,0)+' kg','')}</tbody></table></div>`;
+    if(isN(O.Vtot))t2+=`<div><h2>${isN(Vt)?'10':'9'}. Volumen de obra y hormigonera</h2><table class="rt">${CG}<tbody>${r('Volumen de obra'+(O.panos?' · '+O.panos+' paños':''),fx(O.Vobra,2),'','','m³')}${r(despPor()?'A preparar (desperdicio del cemento '+fx(O.desp,0)+' %)':'Con '+fx(O.desp,0)+' % de desperdicio',fx(O.Vtot,2),'','','m³')}${isN(O.Vh)?r('Capacidad de la hormigonera',fx(O.Vh,3),'','','m³')+r('Viajes necesarios',O.viajes,'','',''):''}${(()=>{const V=O.Vobra,cK=m.C*V*despF('cem');return r('Cemento total',fx(cK,0)+' kg · '+Math.ceil(cK/d.bolsa-1e-9)+' bolsas','','','')+r('Agua total',fx(m.Wef*V*despF('agua'),0),'','','L')+r('Arena húmeda total',fx(m.WfH*V*despF('arena'),0),'','','kg')+r('Grava húmeda total',fx(m.WgH*V*despF('piedra'),0),'','','kg');})()}</tbody></table></div>`;
     if(t2)h2+=`<div class="two">${t2}</div>`;}
   h2+=`<p class="obs"><b>Observación:</b> ${esc(mt.obs||'')}</p>${R.W.length?`<p class="obs"><b>Notas del cálculo:</b> ${R.W.map(esc).join(' · ')}</p>`:''}
     <p class="obs" style="margin-top:4mm">${esc(mt.lugar||'')}, ${esc(mt.fecha||'')}.</p>
@@ -10699,7 +10721,7 @@ function init(){
     else if(a==='delNo'){pendingDel=null;renderHist();}
     else if(a==='delYes'){pendingDel=null;try{await store.del(arg);if(S.id===arg)S.id=null;}catch(err){setText('saveMsg','No se pudo eliminar.');}renderHist();}
     else if(a==='restoreT'){T=defaultTables();LS.set(TABS,T);buildTablas();refresh();}
-    else if(a==='printRep'){let pr=document.getElementById('repPrint');if(!pr){pr=document.createElement('div');pr.id='repPrint';document.body.appendChild(pr);}pr.innerHTML=expediente();document.body.classList.add('print-rep');const done=()=>{document.body.classList.remove('print-rep');window.removeEventListener('afterprint',done);};window.addEventListener('afterprint',done);setTimeout(()=>window.print(),50);setTimeout(done,60000);}
+    else if(a==='printRep'){let pr=document.getElementById('repPrint');if(!pr){pr=document.createElement('div');pr.id='repPrint';document.body.appendChild(pr);}pr.innerHTML=expediente();try{ajustarHojas(pr);}catch(e){console.warn('[SICMAT] ajuste de hojas',e);}document.body.classList.add('print-rep');const done=()=>{document.body.classList.remove('print-rep');window.removeEventListener('afterprint',done);};window.addEventListener('afterprint',done);setTimeout(()=>window.print(),50);setTimeout(done,60000);}
     else if(a==='copyMem'){const el=$('#o_memo');copyText(el.innerText,'memMsg',el);}
     else if(a==='copyTsv'){const m=R.M[R.adopt];if(!m||!m.ok)return;
       const rows=[['Material','Seco kg/m3','Corregido kg/m3','Por bolsa kg','Proporcion'],['Cemento',m.C,m.C,S.d.bolsa,1],['Agua (L)',m.agua,m.Wef,m.aB,m.Wef/m.C],['Agregado fino',m.Wf,m.WfH,m.WfH/R.D.bolsas,m.pF],['Agregado grueso',m.Wg,m.WgH,m.WgH/R.D.bolsas,m.pG]];
