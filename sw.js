@@ -1,5 +1,5 @@
 // Service worker: deja la app disponible sin internet después de la primera visita.
-const CACHE='sicmat-b-'+'202611051324';
+const CACHE='sicmat-b-'+'202611051409';
 const FILES=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png',
   './pyodide/pyodide.js','./pyodide/pyodide.asm.mjs','./pyodide/pyodide.asm.wasm','./pyodide/python_stdlib.zip','./pyodide/pyodide-lock.json'];  // motor de cálculo Python
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
